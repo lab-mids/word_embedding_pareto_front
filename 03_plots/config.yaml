@@ -1,0 +1,55 @@
+# Centralized file paths and parameters
+
+# Path to the directory containing material systems with similarities
+original_dir: "../02_pareto_prediction/material_systems_with_similarities"
+# Path to the directory containing the pareto data
+pareto_dir: "../02_pareto_prediction/material_systems_pareto_front"
+
+
+rule_auto_paired_distribution_plot:
+
+  # List of column names to plot
+  selected_columns:
+    - "Current_at_-300mV"
+    - "Current_at_1700mV"
+    - "Current_at_850mV"
+    - "Similarity_to_dielectric"
+    - "Similarity_to_conductivity"
+
+  # Number of subplots per row in the generated plot
+  subplots_per_row: 3
+  # Path to save the output plot
+  save_dir: "plots/paired_distribution"
+
+rule_scatter_plot_with_pareto:
+
+  # Prefix for identifying current density columns
+  column_prefix: "Current_at_"
+
+  # Column name for x-coordinates in the scatter plot
+  x_column: "x"
+
+  # Column name for y-coordinates in the scatter plot
+  y_column: "y"
+
+  # Path to save the output plot
+  output_dir: "plots/scatter_with_pareto"
+
+rule_current_density_plotter:
+  # Directory containing the CSV files
+  directory: "../02_pareto_prediction/material_systems/Ni_Pd_Pt_Ru_subset"
+
+  # Column name for x-axis positions
+  x_col: "x"
+
+  # Column name for y-axis positions
+  y_col: "y"
+
+  # Column name for current density values
+  current_col: "Current_at_1700mV"
+
+  # Number of subplots per row
+  figs_per_row: 4
+
+  # Path to save the output plot
+  output_file: "plots/scatter_current_density/Ni_Pd_Pt_Ru_scatter.pdf"

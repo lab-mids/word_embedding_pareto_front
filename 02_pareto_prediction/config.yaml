@@ -1,0 +1,76 @@
+# Please make sure that the MinDMaxC directory contains the material systems for ORR and HER,
+  # and the MaxDMinC directory contains the material systems for OER
+
+# Centralized file paths and parameters
+# Path to the directory containing material systems with similarities
+# Change this dir to MaxDMinC for OER
+processed_material_systems_MinDMaxC: "material_systems_with_similarities/MinDMaxC"
+processed_material_systems_MaxDMinC: "material_systems_with_similarities/MaxDMinC"
+
+
+
+# Parameters for processing material systems
+rule_process_material_systems_MinDMaxC:
+  # Input directory containing material systems
+  input_directory: 'material_systems/MinDMaxC'
+  # Path to the model file
+  model_path: "../01_word2vec_model/model/multi_source_papers_electrocatalyst.model"
+  # List of properties to calculate similarity
+  property_list:
+    - dielectric
+    - conductivity
+  # Number of workers for parallel processing
+  num_workers: 1
+  # Output done file path
+  done_file: "process_material_systems_MinDMaxC.done"
+
+rule_process_material_systems_MaxDMinC:
+    # Input directory containing material systems
+    input_directory: 'material_systems/MaxDMinC'
+    # Path to the model file
+    model_path: "../01_word2vec_model/model/multi_source_papers_electrocatalyst.model"
+    # List of properties to calculate similarity
+    property_list:
+        - dielectric
+        - conductivity
+    # Number of workers for parallel processing
+    num_workers: 1
+    # Output done file path
+    done_file: "process_material_systems_MaxDMinC.done"
+
+# Parameters for calculating Pareto front
+rule_calculate_pareto_front_MinDMaxC:
+  # Output directory for Pareto front results
+  output_directory: "material_systems_pareto_front/MinDMaxC"
+  # List of objectives for Pareto front calculation
+  objectives:
+    - Similarity_to_dielectric
+    - Similarity_to_conductivity
+  # Global direction list for Pareto front calculation, for HER, ORR the direction is (min, max), for OER the direction is (max, min)
+  global_direction:
+    - min
+    - max
+  # Specific directions for individual files (empty dictionary means using global direction)
+  specific_directions: {}
+  # Number of workers for parallel processing
+  num_workers: 1
+  # Output done file path
+  done_file: "calculate_pareto_front_MinDMaxC.done"
+
+rule_calculate_pareto_front_MaxDMinC:
+    # Output directory for Pareto front results
+    output_directory: "material_systems_pareto_front/MaxDMinC"
+    # List of objectives for Pareto front calculation
+    objectives:
+        - Similarity_to_dielectric
+        - Similarity_to_conductivity
+    # Global direction list for Pareto front calculation, for HER, ORR the direction is (min, max), for OER the direction is (max, min)
+    global_direction:
+        - max
+        - min
+    # Specific directions for individual files (empty dictionary means using global direction)
+    specific_directions: {}
+    # Number of workers for parallel processing
+    num_workers: 1
+    # Output done file path
+    done_file: "calculate_pareto_front_MaxDMinC.done"

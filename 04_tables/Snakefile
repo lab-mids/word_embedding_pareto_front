@@ -1,0 +1,28 @@
+# Define parameters
+configfile: "config.yaml"
+
+
+# Rule to run the PairedSystemStatisticsCalculator
+rule paired_system_statistics_calculator:
+    input:
+        original_dir=config["rule_paired_system_statistics_calculator"]["original_dir"],
+        pareto_dir=config["rule_paired_system_statistics_calculator"]["pareto_dir"]
+    output:
+        element_stats=config["rule_paired_system_statistics_calculator"][
+                          "output_dir"] + "/element_statistics.csv",
+        current_density_stats=config["rule_paired_system_statistics_calculator"][
+                                  "output_dir"] + "/current_density_statistics.csv"
+    params:
+        output_dir=config["rule_paired_system_statistics_calculator"]["output_dir"],
+        column_prefix=config["rule_paired_system_statistics_calculator"]["column_prefix"]
+    log:
+        "logs/paired_system_statistics_calculator.log"
+    shell:
+        """
+        python script/paired_system_statistics_calculator.py \
+            --original_dir {input.original_dir} \
+            --pareto_dir {input.pareto_dir} \
+            --output_dir {params.output_dir} \
+            --column_prefix {params.column_prefix} \
+            > {log} 2>&1
+        """

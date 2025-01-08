@@ -1,0 +1,84 @@
+# Define the config file path
+from tornado.web import authenticated
+
+configfile: "config.yaml"
+
+rule all:
+    input:
+        auto_paired_distribution_plot=config["rule_auto_paired_distribution_plot"]["save_dir"],  # Final directory for paired distribution plots
+        scatter_plot_with_pareto=config["rule_scatter_plot_with_pareto"]["output_dir"],       # Final directory for scatter plots
+        current_density_plotter=config["rule_current_density_plotter"]["output_file"]  # Final plot file
+
+
+# Rule to generate paired distribution plots
+rule auto_paired_distribution_plot:
+    input:
+        original_dir=config["original_dir"],  # Directory containing the original data
+        pareto_dir=config["pareto_dir"]       # Directory containing the pareto data
+    output:
+        save_dir=directory(config["rule_auto_paired_distribution_plot"]["save_dir"])  # Directory to save the generated plots
+    params:
+        selected_columns=" ".join(config["rule_auto_paired_distribution_plot"]["selected_columns"]),  # Columns to plot
+        subplots_per_row=config["rule_auto_paired_distribution_plot"]["subplots_per_row"]             # Subplots per row
+    log:
+        "logs/auto_paired_distribution_plot.log"  # Log file path
+    shell:
+        """
+        python script/paired_distribution_plotter.py \
+            --original_dir {input.original_dir} \
+            --pareto_dir {input.pareto_dir} \
+            --save_dir {output.save_dir} \
+            --selected_columns {params.selected_columns} \
+            --subplots_per_row {params.subplots_per_row} \
+        > {log} 2>&1
+        """
+
+# Rule to generate scatter plots comparing original and Pareto data
+rule scatter_plot_with_pareto:
+    input:
+        original_dir=config["original_dir"],  # Directory containing the original processed data
+        pareto_dir=config["pareto_dir"]       # Directory containing the Pareto front data
+    output:
+        output_dir=directory(config["rule_scatter_plot_with_pareto"]["output_dir"])  # Directory to save the generated scatter plots
+    params:
+        column_prefix=config["rule_scatter_plot_with_pareto"]["column_prefix"],  # Prefix for current density columns
+        x_column=config["rule_scatter_plot_with_pareto"]["x_column"],            # Column name for x-coordinates
+        y_column=config["rule_scatter_plot_with_pareto"]["y_column"]             # Column name for y-coordinates
+    log:
+        "logs/scatter_plot_with_pareto.log"  # Log file path
+    shell:
+        """
+        python script/scatter_plot_with_pareto.py \
+            --original_dir {input.original_dir} \
+            --pareto_dir {input.pareto_dir} \
+            --output_dir {output.output_dir} \
+            --column_prefix {params.column_prefix} \
+            --x_column {params.x_column} \
+            --y_column {params.y_column} \
+        > {log} 2>&1
+        """
+
+# Rule to generate the current density plot
+rule current_density_plotter:
+    input:
+        directory=config["rule_current_density_plotter"]["directory"]  # Directory containing CSV files
+    output:
+        plot_file=config["rule_current_density_plotter"]["output_file"]  # Path to save the plot
+    params:
+        x_col=config["rule_current_density_plotter"]["x_col"],          # Column for x-axis positions
+        y_col=config["rule_current_density_plotter"]["y_col"],          # Column for y-axis positions
+        current_col=config["rule_current_density_plotter"]["current_col"],  # Column for current density values
+        figs_per_row=config["rule_current_density_plotter"]["figs_per_row"]  # Number of subplots per row
+    log:
+        "logs/current_density_plotter.log"  # Log file for the rule
+    shell:
+        """
+        python script/current_density_plotter.py \
+            --directory {input.directory} \
+            --x_col {params.x_col} \
+            --y_col {params.y_col} \
+            --current_col {params.current_col} \
+            --figs_per_row {params.figs_per_row} \
+            --output_file {output.plot_file} \
+        > {log} 2>&1
+        """

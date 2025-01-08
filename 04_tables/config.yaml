@@ -1,0 +1,5 @@
+rule_paired_system_statistics_calculator:
+  original_dir: "../02_pareto_prediction/material_systems_with_similarities"
+  pareto_dir: "../02_pareto_prediction/material_systems_pareto_front"
+  output_dir: "comparison_results"
+  column_prefix: "Current_at_"
