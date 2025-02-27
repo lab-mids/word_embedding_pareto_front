@@ -112,8 +112,9 @@ class PairedSystemStatisticsCalculator:
                 }
                 element_results.append(stats)
 
-            original_current_stats = self.calculate_stats(original_data, [current_column])
-            pareto_current_stats = self.calculate_stats(pareto_data, [current_column])
+            original_current_stats = self.calculate_stats(original_data,
+                                                          [current_column],round_digits=False)
+            pareto_current_stats = self.calculate_stats(pareto_data, [current_column], round_digits=False)
 
             current_stats = {
                 "System": system_name,

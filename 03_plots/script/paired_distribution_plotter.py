@@ -2,6 +2,8 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 import argparse
+import matplotlib.ticker as mtick
+import numpy as np
 
 
 class AutoPairedDistributionPlotter:
@@ -72,17 +74,32 @@ class AutoPairedDistributionPlotter:
             ax.text(-0.1, 1.05, f'({labels[idx]})', transform=ax.transAxes,
                     size=12, weight='bold', va='top', ha='right')
 
-    def plot_paired_distributions(self, selected_columns=None, subplots_per_row=2):
+
+
+    def plot_paired_distributions(self, selected_columns=None, subplots_per_row=2,
+                                  text_scale=1.5):
         """
         Plot the distribution comparisons for each system, arranging each system's plots in a grid.
 
         Args:
             selected_columns (list, optional): List of column names to plot. If None, all common numeric columns are plotted.
             subplots_per_row (int, optional): Number of subplots per row. Defaults to 2.
+            text_scale (float, optional): Scaling factor for text size. Defaults to 1.5.
 
         Returns:
             None
         """
+
+        # Set the text scale globally for Matplotlib
+        plt.rcParams.update({
+            'font.size': 10 * text_scale,
+            'axes.titlesize': 12 * text_scale,
+            'axes.labelsize': 11 * text_scale,
+            'xtick.labelsize': 10 * text_scale,
+            'ytick.labelsize': 10 * text_scale,
+            'legend.fontsize': 9 * text_scale
+        })
+
         paired_files = self._find_paired_files()
 
         for original_file, pareto_file in paired_files:
@@ -95,22 +112,24 @@ class AutoPairedDistributionPlotter:
 
             # Use selected columns if provided, otherwise plot all numeric columns
             if selected_columns:
-                # Ensure selected columns exist in both datasets
-                columns_to_plot = [col for col in selected_columns if col in numeric_columns]
+                columns_to_plot = [col for col in selected_columns if
+                                   col in numeric_columns]
             else:
                 columns_to_plot = numeric_columns
 
             if not columns_to_plot:
-                # Skip if there are no valid columns to plot
-                continue
+                continue  # Skip if there are no valid columns to plot
 
             # Determine the total number of rows based on how many subplots per row
             num_columns = len(columns_to_plot)
-            nrows = (num_columns + subplots_per_row - 1) // subplots_per_row  # Ceiling division to get the number of rows
+            nrows = (
+                                num_columns + subplots_per_row - 1) // subplots_per_row  # Ceiling division
 
             # Create subplots dynamically based on the number of valid columns
-            fig, axes = plt.subplots(nrows, subplots_per_row, figsize=(5 * subplots_per_row, 4 * nrows))
-            axes = axes.flatten() if num_columns > 1 else [axes]  # Ensure axes is always a list
+            fig, axes = plt.subplots(nrows, subplots_per_row,
+                                     figsize=(5 * subplots_per_row, 4 * nrows))
+            axes = axes.flatten() if num_columns > 1 else [
+                axes]  # Ensure axes is always a list
 
             for idx, column_name in enumerate(columns_to_plot):
                 ax = axes[idx]
@@ -120,18 +139,46 @@ class AutoPairedDistributionPlotter:
                 pareto_values = pareto_data[column_name]
 
                 # Plot histograms for original and pareto data with custom colors
-                ax.hist(original_values, bins=20, alpha=0.5, label='Original', color='blue')
-                ax.hist(pareto_values, bins=20, alpha=0.5, label='Pareto Front', color='red')
+                ax.hist(original_values, bins=20, alpha=0.5, label='Original',
+                        color='blue')
+                ax.hist(pareto_values, bins=20, alpha=0.5, label='Pareto Front',
+                        color='red')
 
                 # Set labels and title
-                ax.set_xlabel(column_name)
+                ax.set_xlabel(column_name.replace("_", " "))
                 ax.set_ylabel('Count')
+
+                # Determine optimal decimal places for x-axis labels
+                x_ticks = ax.get_xticks()
+                unique_rounded_1 = len(set(np.round(x_ticks, 1)))
+                unique_rounded_2 = len(set(np.round(x_ticks, 2)))
+                unique_rounded_3 = len(set(np.round(x_ticks, 3)))
+
+                if unique_rounded_1 == len(x_ticks):
+                    decimal_places = 1  # If rounding to 1 decimal place works, use it
+                elif unique_rounded_2 == len(x_ticks):
+                    decimal_places = 2  # If rounding to 2 works, use it
+                else:
+                    decimal_places = 3  # Otherwise, use 3 decimal places
+
+                # Format x-axis labels
+                ax.xaxis.set_major_formatter(
+                    mtick.FormatStrFormatter(f'%.{decimal_places}f'))
 
                 # Add legend
                 ax.legend()
 
-            # Label each subplot (a), (b), (c), etc.
-            self._label_subplots(axes[:num_columns])
+            # Label each subplot (a), (b), (c), etc., with larger text
+            for idx, ax in enumerate(axes[:num_columns]):
+                label = f"({chr(97 + idx)})"  # Generate labels (a), (b), (c), ...
+                ax.text(
+                    -0.1, 1.1, label,
+                    transform=ax.transAxes,
+                    fontsize=12 * text_scale,
+                    fontweight='bold',
+                    va='top',
+                    ha='left'
+                )
 
             # Remove any empty subplots if there are fewer columns than expected
             if len(columns_to_plot) < len(axes):
@@ -142,13 +189,17 @@ class AutoPairedDistributionPlotter:
             plt.tight_layout()
 
             # Get system name from the file name
-            system_name = os.path.basename(original_file).replace("_material_system_with_similarity.csv", "")
+            system_name = os.path.basename(original_file).replace(
+                "_material_system_with_similarity.csv", "")
 
             # Save figure if save_dir is provided
             if self.save_dir:
                 if not os.path.exists(self.save_dir):
                     os.makedirs(self.save_dir)
-                fig.savefig(os.path.join(self.save_dir, f'{system_name}_distribution.pdf'), bbox_inches='tight')
+                fig.savefig(
+                    os.path.join(self.save_dir, f'{system_name}_distribution.pdf'),
+                    bbox_inches='tight'
+                )
 
             # Close the figure to free up memory
             plt.close(fig)

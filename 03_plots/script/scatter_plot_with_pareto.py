@@ -85,12 +85,15 @@ class ScatterPlotWithPareto:
             pareto_data = pd.read_csv(pareto_file)
 
             current_column = self._find_current_column(original_data.columns)
-            if not current_column or current_column != self._find_current_column(pareto_data.columns):
-                print(f"Skipping files due to unmatched current density column: {original_file}, {pareto_file}")
+            if not current_column or current_column != self._find_current_column(
+                    pareto_data.columns):
+                print(
+                    f"Skipping files due to unmatched current density column: {original_file}, {pareto_file}")
                 continue
 
             system_name = self._extract_system_name(os.path.basename(original_file))
-            output_path = os.path.join(self.output_dir, f"{system_name}_pareto_front_scatter_plot.pdf")
+            output_path = os.path.join(self.output_dir,
+                                       f"{system_name}_pareto_front_scatter_plot.pdf")
 
             # Generate the plot
             fig, axs = plt.subplots(1, 2, figsize=(12, 6), sharex=True, sharey=True)
@@ -99,31 +102,15 @@ class ScatterPlotWithPareto:
             vmin = original_data[current_column].min()
             vmax = original_data[current_column].max()
 
-            # First subplot: Original data
+            # First subplot: Pareto data (swapped positions)
             axs[0].scatter(
-                original_data[self.x_column],
-                original_data[self.y_column],
-                c=original_data[current_column],
-                cmap="viridis",
-                alpha=0.8,
-                edgecolor="none",
-                vmin=vmin,
-                vmax=vmax
-            )
-            axs[0].set_xlabel("x")
-            axs[0].set_ylabel("y")
-            axs[0].set_aspect('equal', adjustable='box')  # Ensure equal aspect ratio
-            axs[0].text(-0.1, 1.05, "(a)", transform=axs[0].transAxes, size=14, weight="bold", va="top", ha="right")
-
-            # Second subplot: Pareto data
-            axs[1].scatter(
                 original_data[self.x_column],
                 original_data[self.y_column],
                 c="lightgray",
                 alpha=0.5,
                 edgecolor="none"
             )
-            axs[1].scatter(
+            axs[0].scatter(
                 pareto_data[self.x_column],
                 pareto_data[self.y_column],
                 c=pareto_data[current_column],
@@ -133,19 +120,39 @@ class ScatterPlotWithPareto:
                 vmin=vmin,
                 vmax=vmax
             )
-            axs[1].set_xlabel("x")
+            axs[0].set_xlabel("x (mm)")
+            axs[0].set_ylabel("y (mm)")
+            axs[0].set_aspect('equal', adjustable='box')  # Ensure equal aspect ratio
+            axs[0].text(-0.1, 1.05, "(a)", transform=axs[0].transAxes, size=14,
+                        weight="bold", va="top", ha="right")
+
+            # Second subplot: Original data (swapped positions)
+            axs[1].scatter(
+                original_data[self.x_column],
+                original_data[self.y_column],
+                c=original_data[current_column],
+                cmap="viridis",
+                alpha=0.8,
+                edgecolor="none",
+                vmin=vmin,
+                vmax=vmax
+            )
+            axs[1].set_xlabel("x (mm)")
+            axs[1].set_ylabel("y (mm)")
             axs[1].set_aspect('equal', adjustable='box')  # Ensure equal aspect ratio
-            axs[1].text(-0.1, 1.05, "(b)", transform=axs[1].transAxes, size=14, weight="bold", va="top", ha="right")
+            axs[1].text(-0.1, 1.05, "(b)", transform=axs[1].transAxes, size=14,
+                        weight="bold", va="top", ha="right")
 
             # Add a single shared colorbar
             cbar = fig.colorbar(
-                plt.cm.ScalarMappable(cmap="viridis", norm=plt.Normalize(vmin=vmin, vmax=vmax)),
+                plt.cm.ScalarMappable(cmap="viridis",
+                                      norm=plt.Normalize(vmin=vmin, vmax=vmax)),
                 ax=axs,
                 orientation="vertical",
                 fraction=0.03,
                 pad=0.1
             )
-            cbar.set_label(f"{current_column} (mA/cm²)")
+            cbar.set_label(f"{current_column.replace('_',' ')} (mA/cm²)")
 
             plt.subplots_adjust(right=0.85, wspace=0.2)
             fig.savefig(output_path, bbox_inches="tight")

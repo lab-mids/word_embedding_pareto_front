@@ -1,5 +1,5 @@
 
-# Accelerating Electrocatalyst Discovery through Text Mining and Multi-Objective Optimization
+# Electrocatalyst Discovery through Text Mining and Multi-Objective Optimization
 
 This repository contains the code and workflows described in the paper *"Accelerating Electrocatalyst Discovery through Text Mining and Multi-Objective Optimization"*. The project uses natural language processing and multi-objective Pareto optimization to accelerate material discovery processes.
 

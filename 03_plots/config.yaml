@@ -53,3 +53,7 @@ rule_current_density_plotter:
 
   # Path to save the output plot
   output_file: "plots/scatter_current_density/Ni_Pd_Pt_Ru_scatter.pdf"
+
+rule_pareto_illustration_plotter:
+  # Directory containing the CSV files
+  directory: "."

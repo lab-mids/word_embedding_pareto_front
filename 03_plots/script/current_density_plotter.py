@@ -70,8 +70,8 @@ class CurrentDensityPlotter:
                 s=20
             )
             ax.set_aspect('equal')  # Ensure equal x-y spacing
-            ax.set_xlabel("x")
-            ax.set_ylabel("y")
+            ax.set_xlabel("x (mm)")
+            ax.set_ylabel("y (mm)")
             ax.grid(True)
 
         # Turn off unused subplots

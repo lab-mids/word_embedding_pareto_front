@@ -7,7 +7,8 @@ rule all:
     input:
         auto_paired_distribution_plot=config["rule_auto_paired_distribution_plot"]["save_dir"],  # Final directory for paired distribution plots
         scatter_plot_with_pareto=config["rule_scatter_plot_with_pareto"]["output_dir"],       # Final directory for scatter plots
-        current_density_plotter=config["rule_current_density_plotter"]["output_file"]  # Final plot file
+        current_density_plotter=config["rule_current_density_plotter"]["output_file"], # Final plot file
+        rule_pareto_illustration_plotter=f"{config['rule_pareto_illustration_plotter']['directory']}/pareto_front_illustration.pdf"
 
 
 # Rule to generate paired distribution plots
@@ -80,5 +81,19 @@ rule current_density_plotter:
             --current_col {params.current_col} \
             --figs_per_row {params.figs_per_row} \
             --output_file {output.plot_file} \
+        > {log} 2>&1
+        """
+
+rule pareto_illustration_plotter:
+    output:
+        f"{config['rule_pareto_illustration_plotter']['directory']}/pareto_front_illustration.pdf"
+    params:
+        output_dir=config["rule_pareto_illustration_plotter"]["directory"]
+    log:
+        "logs/pareto_illustration_plotter.log"
+    shell:
+        """
+        python script/pareto_illustration_plotter.py \
+            --output-dir {params.output_dir} \
         > {log} 2>&1
         """
